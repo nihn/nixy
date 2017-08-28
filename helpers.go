@@ -100,13 +100,16 @@ type Weight struct {
 func calculateWeights(app App, labels map[string]string) Weight {
 	extra_upstreams := strings.Split(labels["NIXY_EXTRA_UPSTREAMS"], " ")
 	extra_weight, err := strconv.ParseFloat(labels["NIXY_EXTRA_UPSTREAMS_WEIGHT"], 64)
-	if err != nil {
+	if err != nil || extra_weight < 0.001 || extra_weight > 0.999 {
 		return Weight{1, 1}
 	}
 	current_tasks := float64(len(app.Tasks)) / float64(len(app.Tasks) + len(extra_upstreams))
 	current_extra := 1 - current_tasks
 	extra_task_weight := int(1000 * extra_weight/current_extra)
 	task_weight := int(1000 * (1-extra_weight)/current_tasks)
+	if task_weight == 0.0 || extra_weight == 0.0 {
+		return Weight{task_weight, extra_task_weight}
+	}
 	gcd := GCD(task_weight, extra_task_weight)
 	return Weight{task_weight /gcd, extra_task_weight / gcd}
 }
