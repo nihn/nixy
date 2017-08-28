@@ -405,7 +405,13 @@ func getTmpl() (*template.Template, error) {
 			"trim":     strings.Trim,
 			"replace":  strings.Replace,
 			"getenv":   os.Getenv,
-			"datetime": time.Now}).
+			"datetime": time.Now,
+			"getUpstreamName": getUpstreamName,
+			"getUpstreams": getUpstreams,
+			"labelEnabled": labelEnabled,
+			"iteratePortsDefinitions": iteratePortsDefinitions,
+			"normalizeAppIdToStatsdMetric": normalizeAppIdToStatsdMetric,
+		}).
 		ParseFiles(config.Nginx_template)
 }
 
