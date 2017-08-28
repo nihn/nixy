@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"strconv"
 	"strings"
 )
 
@@ -79,4 +80,33 @@ func normalizeAppIdToStatsdMetric(appId string) string {
 	metric := strings.SplitN(appId[1:], "/", 3)
 	metric[len(metric)-1] = strings.Replace(metric[len(metric)-1], "/", "_", -1)
 	return strings.Join(metric, ".")
+}
+
+func GCD(a, b int) int {
+	for a != b {
+		if a > b {
+			a -= b
+		} else {
+			b -= a
+		}
+	}
+	return a
+}
+
+type Weight struct {
+    Task, Extra int
+}
+
+func calculateWeights(app App, labels map[string]string) Weight {
+	extra_upstreams := strings.Split(labels["NIXY_EXTRA_UPSTREAMS"], " ")
+	extra_weight, err := strconv.ParseFloat(labels["NIXY_EXTRA_UPSTREAMS_WEIGHT"], 64)
+	if err != nil {
+		return Weight{1, 1}
+	}
+	current_tasks := float64(len(app.Tasks)) / float64(len(app.Tasks) + len(extra_upstreams))
+	current_extra := 1 - current_tasks
+	extra_task_weight := int(1000 * extra_weight/current_extra)
+	task_weight := int(1000 * (1-extra_weight)/current_tasks)
+	gcd := GCD(task_weight, extra_task_weight)
+	return Weight{task_weight /gcd, extra_task_weight / gcd}
 }

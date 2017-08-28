@@ -411,6 +411,7 @@ func getTmpl() (*template.Template, error) {
 			"labelEnabled": labelEnabled,
 			"iteratePortsDefinitions": iteratePortsDefinitions,
 			"normalizeAppIdToStatsdMetric": normalizeAppIdToStatsdMetric,
+			"calculateWeights": calculateWeights,
 		}).
 		ParseFiles(config.Nginx_template)
 }
